@@ -9,11 +9,11 @@ import (
 
 // FeedHandler handles HTTP requests for feeds
 type FeedHandler struct {
-	feedService *usecase.FeedService
+	feedService usecase.FeedServiceInterface // ← Інтерфейс
 }
 
 // NewFeedHandler creates a new feed handler
-func NewFeedHandler(feedService *usecase.FeedService) FeedHandlerInterface {
+func NewFeedHandler(feedService usecase.FeedServiceInterface) FeedHandlerInterface {
 	return &FeedHandler{
 		feedService: feedService,
 	}
@@ -33,10 +33,8 @@ func (h *FeedHandler) CreateFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set user ID from context
-	req.UserID = user.ID
-
-	feed, err := h.feedService.CreateFeed(r.Context(), req)
+	// Create feed with user ID from context
+	feed, err := h.feedService.CreateFeed(r.Context(), req, user.ID)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -53,31 +51,22 @@ func (h *FeedHandler) GetUserFeeds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Implement GetUserFeeds in service
-	// feeds, err := h.feedService.GetUserFeeds(r.Context(), user.ID)
-	// if err != nil {
-	//     respondWithError(w, http.StatusInternalServerError, err.Error())
-	//     return
-	// }
+	feeds, err := h.feedService.GetByUserID(r.Context(), user.ID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	// Placeholder response
-	respondWithJSON(w, http.StatusOK, map[string]string{
-		"message": "GetUserFeeds not implemented yet",
-		"user_id": user.ID.String(),
-	})
+	respondWithJSON(w, http.StatusOK, feeds)
 }
 
 // GetAllFeeds handles GET /feeds/all (admin endpoint)
 func (h *FeedHandler) GetAllFeeds(w http.ResponseWriter, r *http.Request) {
-	// TODO: Implement GetAllFeeds in service
-	// feeds, err := h.feedService.GetAllFeeds(r.Context())
-	// if err != nil {
-	//     respondWithError(w, http.StatusInternalServerError, err.Error())
-	//     return
-	// }
+	feeds, err := h.feedService.GetAllFeeds(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	// Placeholder response
-	respondWithJSON(w, http.StatusOK, map[string]string{
-		"message": "GetAllFeeds not implemented yet",
-	})
+	respondWithJSON(w, http.StatusOK, feeds)
 }

@@ -9,11 +9,11 @@ import (
 
 // AuthMiddleware validates API key from request headers
 type AuthMiddleware struct {
-	userService *usecase.UserService
+	userService usecase.UserServiceInterface // ← Інтерфейс
 }
 
 // NewAuthMiddleware creates new auth middleware
-func NewAuthMiddleware(userService *usecase.UserService) AuthMiddlewareInterface {
+func NewAuthMiddleware(userService usecase.UserServiceInterface) AuthMiddlewareInterface {
 	return &AuthMiddleware{userService: userService}
 }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/olehhuss/rssagg/internal/usecase"
 )
 
-// UserRepository implements the user repository using PostgreSQL
+// UserRepository implements usecase.UserRepository interface
 type UserRepository struct {
 	queries *database.Queries
 }
@@ -25,12 +25,7 @@ func NewUserRepository(queries *database.Queries) usecase.UserRepository {
 
 // Create creates a new user in the database
 func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
-	params := database.CreateUserParams{
-		ID:        user.ID,
-		CreatedAt: sql.NullTime{Time: user.CreatedAt, Valid: true},
-		UpdatedAt: sql.NullTime{Time: user.UpdatedAt, Valid: true},
-		Name:      user.Name,
-	}
+	params := r.domainUserToCreateParams(user)
 
 	dbUser, err := r.queries.CreateUser(ctx, params)
 	if err != nil {
@@ -45,8 +40,12 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 // GetByID retrieves a user by ID
 func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	// Note: You'll need to add this query to users.sql
-	// For now, this is a placeholder
-	return nil, fmt.Errorf("GetByID not implemented yet")
+	dbUser, err := r.queries.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by ID: %w", err)
+	}
+
+	return r.dbUserToDomain(dbUser), nil
 }
 
 // GetByAPIKey retrieves a user by API key
@@ -56,13 +55,26 @@ func (r *UserRepository) GetByAPIKey(ctx context.Context, apiKey string) (*domai
 		return nil, fmt.Errorf("failed to get user by API key: %w", err)
 	}
 
-	domainUser := &domain.User{
+	return r.dbUserToDomain(dbUser), nil
+}
+
+// dbUserToDomain converts a database user model to a domain user model
+func (r *UserRepository) dbUserToDomain(dbUser database.User) *domain.User {
+	return &domain.User{
 		ID:        dbUser.ID,
 		CreatedAt: dbUser.CreatedAt.Time,
 		UpdatedAt: dbUser.UpdatedAt.Time,
 		Name:      dbUser.Name,
 		APIKey:    dbUser.ApiKey,
 	}
+}
 
-	return domainUser, nil
+// domainUserToCreateParams converts a domain user to database create parameters
+func (r *UserRepository) domainUserToCreateParams(user *domain.User) database.CreateUserParams {
+	return database.CreateUserParams{
+		ID:        user.ID,
+		CreatedAt: sql.NullTime{Time: user.CreatedAt, Valid: true},
+		UpdatedAt: sql.NullTime{Time: user.UpdatedAt, Valid: true},
+		Name:      user.Name,
+	}
 }

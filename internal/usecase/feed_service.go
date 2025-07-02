@@ -10,12 +10,12 @@ import (
 
 // FeedService handles feed-related business logic
 type FeedService struct {
-	feedRepo FeedRepository
-	userRepo UserRepository
+	feedRepo FeedRepository // ← Інтерфейс
+	userRepo UserRepository // ← Інтерфейс
 }
 
 // NewFeedService creates a new feed service
-func NewFeedService(feedRepo FeedRepository, userRepo UserRepository) *FeedService {
+func NewFeedService(feedRepo FeedRepository, userRepo UserRepository) FeedServiceInterface {
 	return &FeedService{
 		feedRepo: feedRepo,
 		userRepo: userRepo,
@@ -24,36 +24,51 @@ func NewFeedService(feedRepo FeedRepository, userRepo UserRepository) *FeedServi
 
 // CreateFeedRequest represents the request to create a feed
 type CreateFeedRequest struct {
-	Name   string    `json:"name"`
-	URL    string    `json:"url"`
-	UserID uuid.UUID `json:"user_id"`
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
+func (s *FeedService) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.Feed, error) {
+	feeds, err := s.feedRepo.GetByUserID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user feeds: %w", err)
+	}
+
+	return feeds, nil
 }
 
 // CreateFeed creates a new feed
-func (s *FeedService) CreateFeed(ctx context.Context, req CreateFeedRequest) (*domain.Feed, error) {
+func (s *FeedService) CreateFeed(ctx context.Context, req CreateFeedRequest, userID uuid.UUID) (*domain.Feed, error) {
+	// Валідація
 	if req.Name == "" {
-		return nil, fmt.Errorf("name is required")
+		return nil, fmt.Errorf("feed name is required")
 	}
 	if req.URL == "" {
-		return nil, fmt.Errorf("url is required")
+		return nil, fmt.Errorf("feed URL is required")
 	}
 
-	// Validate user
-	_, err := s.userRepo.GetByID(ctx, req.UserID)
+	// Перевірка існування користувача
+	_, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to identify user: %w", err)
+		return nil, fmt.Errorf("user not found: %w", err)
 	}
 
+	// Створення фіду
 	feed := domain.NewFeedBuilder().
 		WithName(req.Name).
 		WithURL(req.URL).
-		WithUserID(req.UserID).
+		WithUserID(userID).
 		Build()
 
-	err = s.feedRepo.Create(ctx, feed)
-	if err != nil {
+	// Збереження в базу
+	if err := s.feedRepo.Create(ctx, feed); err != nil {
 		return nil, fmt.Errorf("failed to create feed: %w", err)
 	}
 
 	return feed, nil
+}
+
+// GetAllFeeds retrieves all feeds
+func (s *FeedService) GetAllFeeds(ctx context.Context) ([]*domain.Feed, error) {
+	return s.feedRepo.GetAll(ctx)
 }

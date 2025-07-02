@@ -4,14 +4,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 
 	"github.com/olehhuss/rssagg/internal/database"
 	"github.com/olehhuss/rssagg/internal/handler"
 	"github.com/olehhuss/rssagg/internal/infrastructure"
 	repository "github.com/olehhuss/rssagg/internal/repository/postgres"
+	"github.com/olehhuss/rssagg/internal/router"
 	"github.com/olehhuss/rssagg/internal/usecase"
 )
 
@@ -39,58 +38,31 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(queries)
-	// feedRepo := repository.NewFeedRepository(queries) // TODO: implement later
+	feedRepo := repository.NewFeedRepository(queries)
 
 	// Initialize use cases
 	userService := usecase.NewUserService(userRepo)
-	// feedService := usecase.NewFeedService(feedRepo, userRepo) // TODO: implement later
+	feedService := usecase.NewFeedService(feedRepo, userRepo)
 
 	// Initialize handlers
 	userHandler := handler.NewUserHandler(userService)
+	feedHandler := handler.NewFeedHandler(feedService)
 	authMiddleware := handler.NewAuthMiddleware(userService)
 
+	// Create router configuration
+	routerConfig := &router.Config{
+		UserHandler:    userHandler,
+		FeedHandler:    feedHandler,
+		AuthMiddleware: authMiddleware,
+		// PostHandler and FeedFollowHandler will be added when implemented
+	}
+
 	// Setup router
-	router := setupRouter(userHandler, authMiddleware)
+	r := router.Setup(routerConfig)
 
 	// Start server
 	log.Printf("Server starting on port %s", config.Server.Port)
-	if err := http.ListenAndServe(":"+config.Server.Port, router); err != nil {
+	if err := http.ListenAndServe(":"+config.Server.Port, r); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
-}
-
-func setupRouter(userHandler handler.UserHandlerInterface, authMiddleware handler.AuthMiddlewareInterface) chi.Router {
-	router := chi.NewRouter()
-
-	// CORS middleware
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300,
-	}))
-
-	// API v1 routes
-	v1Router := chi.NewRouter()
-
-	// Public routes
-	v1Router.Get("/healthz", handler.HealthCheck)
-	v1Router.Get("/error", handler.ErrorTest)
-	v1Router.Post("/users", userHandler.CreateUser)
-
-	// Protected routes (require authentication)
-	v1Router.Group(func(r chi.Router) {
-		// Add auth middleware to protected routes
-		// r.Use(authMiddleware.Authenticate)
-
-		// Future protected endpoints will go here:
-		// r.Post("/feeds", feedHandler.CreateFeed)
-		// r.Get("/feeds", feedHandler.GetUserFeeds)
-		// r.Get("/posts", postHandler.GetUserPosts)
-	})
-
-	router.Mount("/v1", v1Router)
-	return router
 }

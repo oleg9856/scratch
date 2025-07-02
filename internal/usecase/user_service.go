@@ -7,16 +7,17 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/google/uuid"
 	"github.com/olehhuss/rssagg/internal/domain"
 )
 
 // UserService handles user-related business logic
 type UserService struct {
-	userRepo UserRepository
+	userRepo UserRepository // ← Тепер інтерфейс!
 }
 
 // NewUserService creates a new user service
-func NewUserService(userRepo UserRepository) *UserService {
+func NewUserService(userRepo UserRepository) UserServiceInterface {
 	return &UserService{
 		userRepo: userRepo,
 	}
@@ -53,6 +54,16 @@ func (s *UserService) GetUserByAPIKey(ctx context.Context, apiKey string) (*doma
 	}
 
 	user, err := s.userRepo.GetByAPIKey(ctx, apiKey)
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %w", err)
+	}
+
+	return user, nil
+}
+
+// GetUserByID retrieves user by ID
+func (s *UserService) GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+	user, err := s.userRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %w", err)
 	}

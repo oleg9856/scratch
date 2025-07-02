@@ -12,21 +12,20 @@ import (
 	"github.com/olehhuss/rssagg/internal/usecase"
 )
 
-// FeedRepository implements the feed repository using PostgreSQL
+// FeedRepository implements usecase.FeedRepository interface
 type FeedRepository struct {
 	queries *database.Queries
 }
 
+func NewFeedRepository(queries *database.Queries) usecase.FeedRepository {
+	return &FeedRepository{
+		queries: queries,
+	}
+}
+
 // Create implements usecase.FeedRepository.
 func (f *FeedRepository) Create(ctx context.Context, feed *domain.Feed) error {
-	params := database.CreateFeedParams{
-		ID:        feed.ID,
-		CreatedAt: sql.NullTime{Time: feed.CreatedAt, Valid: true},
-		UpdatedAt: sql.NullTime{Time: feed.UpdatedAt, Valid: true},
-		Name:      feed.Name,
-		Url:       feed.URL, // Note: database uses 'Url', domain uses 'URL'
-		UserID:    feed.UserID,
-	}
+	params := f.domainToCreateParams(feed)
 
 	dbFeed, err := f.queries.CreateFeed(ctx, params)
 	if err != nil {
@@ -50,7 +49,7 @@ func (f *FeedRepository) GetAll(ctx context.Context) ([]*domain.Feed, error) {
 
 	feeds := make([]*domain.Feed, len(dbFeeds))
 	for i, dbFeed := range dbFeeds {
-		feeds[i] = f.convertToDomain(dbFeed)
+		feeds[i] = f.dbFeedToDomain(dbFeed)
 	}
 
 	return feeds, nil
@@ -65,7 +64,7 @@ func (f *FeedRepository) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*
 
 	feeds := make([]*domain.Feed, len(dbFeeds))
 	for i, dbFeed := range dbFeeds {
-		feeds[i] = f.convertToDomain(dbFeed)
+		feeds[i] = f.dbFeedToDomain(dbFeed)
 	}
 
 	return feeds, nil
@@ -80,8 +79,8 @@ func (f *FeedRepository) MarkAsFetched(ctx context.Context, feedID uuid.UUID) er
 	return nil
 }
 
-// convertToDomain converts database Feed to domain Feed
-func (f *FeedRepository) convertToDomain(dbFeed database.Feed) *domain.Feed {
+// dbFeedToDomain converts database Feed to domain Feed
+func (f *FeedRepository) dbFeedToDomain(dbFeed database.Feed) *domain.Feed {
 	feed := &domain.Feed{
 		ID:        dbFeed.ID,
 		Name:      dbFeed.Name,
@@ -107,8 +106,14 @@ func (f *FeedRepository) nullTimeToTime(nt sql.NullTime) time.Time {
 	return time.Time{}
 }
 
-func NewFeedRepository(queries *database.Queries) usecase.FeedRepository {
-	return &FeedRepository{
-		queries: queries,
+// domainToCreateParams converts a domain feed to database create parameters
+func (f *FeedRepository) domainToCreateParams(feed *domain.Feed) database.CreateFeedParams {
+	return database.CreateFeedParams{
+		ID:        feed.ID,
+		CreatedAt: sql.NullTime{Time: feed.CreatedAt, Valid: true},
+		UpdatedAt: sql.NullTime{Time: feed.UpdatedAt, Valid: true},
+		Name:      feed.Name,
+		Url:       feed.URL, // Note: database uses 'Url', domain uses 'URL'
+		UserID:    feed.UserID,
 	}
 }

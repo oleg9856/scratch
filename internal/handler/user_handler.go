@@ -9,11 +9,11 @@ import (
 
 // UserHandler handles HTTP requests for users
 type UserHandler struct {
-	userService *usecase.UserService
+	userService usecase.UserServiceInterface // ← Інтерфейс
 }
 
 // NewUserHandler creates a new user handler
-func NewUserHandler(userService *usecase.UserService) UserHandlerInterface {
+func NewUserHandler(userService usecase.UserServiceInterface) UserHandlerInterface {
 	return &UserHandler{
 		userService: userService,
 	}
