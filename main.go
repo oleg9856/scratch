@@ -1,79 +1,96 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
-	"os"
-
-	"github.com/go-chi/cors"
-	"github.com/olehhuss/rssagg/internal/database"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+
+	"github.com/olehhuss/rssagg/internal/database"
+	"github.com/olehhuss/rssagg/internal/handler"
+	"github.com/olehhuss/rssagg/internal/infrastructure"
+	repository "github.com/olehhuss/rssagg/internal/repository/postgres"
+	"github.com/olehhuss/rssagg/internal/usecase"
 )
 
-type apiConfig struct {
-	DB *database.Queries
+func main() {
+	// Load environment variables
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("Warning: .env file not found: %v", err)
+	}
+
+	// Load configuration
+	config, err := infrastructure.LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	// Initialize database
+	db, err := infrastructure.NewDatabase(&config.Database)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// Initialize SQLC queries
+	queries := database.New(db)
+
+	// Initialize repositories
+	userRepo := repository.NewUserRepository(queries)
+	// feedRepo := repository.NewFeedRepository(queries) // TODO: implement later
+
+	// Initialize use cases
+	userService := usecase.NewUserService(userRepo)
+	// feedService := usecase.NewFeedService(feedRepo, userRepo) // TODO: implement later
+
+	// Initialize handlers
+	userHandler := handler.NewUserHandler(userService)
+	authMiddleware := handler.NewAuthMiddleware(userService)
+
+	// Setup router
+	router := setupRouter(userHandler, authMiddleware)
+
+	// Start server
+	log.Printf("Server starting on port %s", config.Server.Port)
+	if err := http.ListenAndServe(":"+config.Server.Port, router); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
 
-func main() {
-	fmt.Println("Hello, World!")
-
-	godotenv.Load(".env")
-
-	portString := os.Getenv("PORT")
-	if portString == "" {
-		log.Fatal("PORT environment variable not set")
-	}
-
-	dbURL := os.Getenv("DB_URL")
-	if dbURL == "" {
-		log.Fatal("DD_URL environment variable not set")
-	}
-
-	conn, err := sql.Open("postgres", dbURL)
-	if err != nil {
-		log.Fatal("Cannot connect to database")
-	}
-
-	apiCfg := apiConfig{
-		DB: database.New(conn),
-	}
-
-	fmt.Println("PORT is set to", portString)
-
+func setupRouter(userHandler handler.UserHandlerInterface, authMiddleware handler.AuthMiddlewareInterface) chi.Router {
 	router := chi.NewRouter()
 
+	// CORS middleware
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-
+		MaxAge:           300,
 	}))
 
+	// API v1 routes
 	v1Router := chi.NewRouter()
 
-	v1Router.Get("/healthz", handlerReadiness)
-	v1Router.Get("/error", handlerError)
-	v1Router.Post("/users", apiCfg.handlerCreateUser)
+	// Public routes
+	v1Router.Get("/healthz", handler.HealthCheck)
+	v1Router.Get("/error", handler.ErrorTest)
+	v1Router.Post("/users", userHandler.CreateUser)
+
+	// Protected routes (require authentication)
+	v1Router.Group(func(r chi.Router) {
+		// Add auth middleware to protected routes
+		// r.Use(authMiddleware.Authenticate)
+
+		// Future protected endpoints will go here:
+		// r.Post("/feeds", feedHandler.CreateFeed)
+		// r.Get("/feeds", feedHandler.GetUserFeeds)
+		// r.Get("/posts", postHandler.GetUserPosts)
+	})
 
 	router.Mount("/v1", v1Router)
-
-	srv := &http.Server{
-		Handler: router,
-		Addr:    ":" + portString,
-	}
-
-	log.Printf("Server starting on port %v", portString)
-	err = srv.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	return router
 }
