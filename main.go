@@ -48,9 +48,11 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 	feedHandler := handler.NewFeedHandler(feedService)
 	authMiddleware := handler.NewAuthMiddleware(userService)
+	homeHandler := handler.NewHomeHandler(userService, feedService)
 
 	// Create router configuration
 	routerConfig := &router.Config{
+		HomeHandler:    homeHandler,
 		UserHandler:    userHandler,
 		FeedHandler:    feedHandler,
 		AuthMiddleware: authMiddleware,

@@ -31,3 +31,10 @@ type FeedFollowHandlerInterface interface {
 type AuthMiddlewareInterface interface {
 	Authenticate(next http.HandlerFunc) http.HandlerFunc
 }
+
+// HomeHandlerInterface defines the contract for home/landing page handlers
+type HomeHandlerInterface interface {
+	GetHome(w http.ResponseWriter, r *http.Request)
+	GetAbout(w http.ResponseWriter, r *http.Request)
+	GetAPIInfo(w http.ResponseWriter, r *http.Request)
+}

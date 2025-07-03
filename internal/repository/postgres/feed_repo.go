@@ -79,6 +79,16 @@ func (f *FeedRepository) MarkAsFetched(ctx context.Context, feedID uuid.UUID) er
 	return nil
 }
 
+// Count returns the total number of feeds
+func (f *FeedRepository) Count(ctx context.Context) (int, error) {
+	count, err := f.queries.GetFeedCount(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count feeds: %w", err)
+	}
+
+	return int(count), nil
+}
+
 // dbFeedToDomain converts database Feed to domain Feed
 func (f *FeedRepository) dbFeedToDomain(dbFeed database.Feed) *domain.Feed {
 	feed := &domain.Feed{

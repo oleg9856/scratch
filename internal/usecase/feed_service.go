@@ -72,3 +72,13 @@ func (s *FeedService) CreateFeed(ctx context.Context, req CreateFeedRequest, use
 func (s *FeedService) GetAllFeeds(ctx context.Context) ([]*domain.Feed, error) {
 	return s.feedRepo.GetAll(ctx)
 }
+
+// GetFeedCount returns the total number of feeds
+func (s *FeedService) GetFeedCount(ctx context.Context) (int, error) {
+	count, err := s.feedRepo.Count(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get feed count: %w", err)
+	}
+
+	return count, nil
+}

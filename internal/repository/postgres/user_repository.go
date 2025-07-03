@@ -58,6 +58,17 @@ func (r *UserRepository) GetByAPIKey(ctx context.Context, apiKey string) (*domai
 	return r.dbUserToDomain(dbUser), nil
 }
 
+// Count returns the total number of users
+func (r *UserRepository) Count(ctx context.Context) (int, error) {
+	// Note: You'll need to add this query to users.sql if it doesn't exist
+	count, err := r.queries.GetUserCount(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count users: %w", err)
+	}
+
+	return int(count), nil
+}
+
 // dbUserToDomain converts a database user model to a domain user model
 func (r *UserRepository) dbUserToDomain(dbUser database.User) *domain.User {
 	return &domain.User{

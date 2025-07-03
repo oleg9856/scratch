@@ -9,7 +9,7 @@ import (
 
 // FeedHandler handles HTTP requests for feeds
 type FeedHandler struct {
-	feedService usecase.FeedServiceInterface // ← Інтерфейс
+	feedService usecase.FeedServiceInterface
 }
 
 // NewFeedHandler creates a new feed handler

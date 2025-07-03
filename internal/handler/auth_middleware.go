@@ -9,7 +9,7 @@ import (
 
 // AuthMiddleware validates API key from request headers
 type AuthMiddleware struct {
-	userService usecase.UserServiceInterface // ← Інтерфейс
+	userService usecase.UserServiceInterface
 }
 
 // NewAuthMiddleware creates new auth middleware

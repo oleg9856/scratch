@@ -11,6 +11,7 @@ import (
 
 // Config holds all handlers and middleware needed for routing
 type Config struct {
+	HomeHandler       handler.HomeHandlerInterface
 	UserHandler       handler.UserHandlerInterface
 	FeedHandler       handler.FeedHandlerInterface
 	PostHandler       handler.PostHandlerInterface
@@ -40,6 +41,9 @@ func Setup(config *Config) chi.Router {
 
 	// Setup protected routes
 	setupProtectedRoutes(v1Router, config)
+
+	// Setup home page routes (public, but at root level)
+	setupHomeRoutes(router, config)
 
 	router.Mount("/v1", v1Router)
 	return router
@@ -75,4 +79,14 @@ func setupProtectedRoutes(router chi.Router, config *Config) {
 		SetupPostRoutes(r, config.PostHandler)
 		SetupFeedFollowRoutes(r, config.FeedFollowHandler)
 	})
+}
+
+// setupHomeRoutes configures the home/landing page routes (public)
+func setupHomeRoutes(router chi.Router, config *Config) {
+	if config.HomeHandler != nil {
+		// Landing page and info endpoints
+		router.Get("/", config.HomeHandler.GetHome)
+		router.Get("/about", config.HomeHandler.GetAbout)
+		router.Get("/api", config.HomeHandler.GetAPIInfo)
+	}
 }

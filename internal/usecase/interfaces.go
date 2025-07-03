@@ -12,6 +12,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error)
 	GetByAPIKey(ctx context.Context, apiKey string) (*domain.User, error)
+	Count(ctx context.Context) (int, error)
 }
 
 type FeedRepository interface {
@@ -19,6 +20,7 @@ type FeedRepository interface {
 	GetByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.Feed, error)
 	GetAll(ctx context.Context) ([]*domain.Feed, error)
 	MarkAsFetched(ctx context.Context, feedID uuid.UUID) error
+	Count(ctx context.Context) (int, error)
 }
 
 type PostRepository interface {
@@ -38,12 +40,14 @@ type UserServiceInterface interface {
 	CreateUser(ctx context.Context, req CreateUserRequest) (*domain.User, error)
 	GetUserByAPIKey(ctx context.Context, apiKey string) (*domain.User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error)
+	GetUserCount(ctx context.Context) (int, error)
 }
 
 type FeedServiceInterface interface {
 	CreateFeed(ctx context.Context, req CreateFeedRequest, userID uuid.UUID) (*domain.Feed, error)
 	GetByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.Feed, error)
 	GetAllFeeds(ctx context.Context) ([]*domain.Feed, error)
+	GetFeedCount(ctx context.Context) (int, error)
 }
 
 type PostServiceInterface interface {

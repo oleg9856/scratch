@@ -71,6 +71,16 @@ func (s *UserService) GetUserByID(ctx context.Context, id uuid.UUID) (*domain.Us
 	return user, nil
 }
 
+// GetUserCount returns the total number of users
+func (s *UserService) GetUserCount(ctx context.Context) (int, error) {
+	count, err := s.userRepo.Count(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get user count: %w", err)
+	}
+
+	return count, nil
+}
+
 // generateAPIKey generates a random API key
 func (s *UserService) generateAPIKey() string {
 	randomBytes := make([]byte, 32)

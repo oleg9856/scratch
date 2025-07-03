@@ -8,3 +8,6 @@ SELECT * FROM users WHERE id = $1;
 
 -- name: GetUserByAPIKey :one
 SELECT * FROM users WHERE api_key = $1;
+
+-- name: GetUserCount :one
+SELECT COUNT(*) FROM users;

@@ -84,6 +84,17 @@ func (q *Queries) GetAllFeeds(ctx context.Context) ([]Feed, error) {
 	return items, nil
 }
 
+const getFeedCount = `-- name: GetFeedCount :one
+SELECT COUNT(*) FROM feeds
+`
+
+func (q *Queries) GetFeedCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getFeedCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getFeedsByUser = `-- name: GetFeedsByUser :many
 SELECT id, created_at, updated_at, name, url, user_id, last_fetched_at FROM feeds WHERE user_id = $1
 `

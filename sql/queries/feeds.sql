@@ -12,3 +12,6 @@ SELECT * FROM feeds;
 -- name: MarkFeedAsFetched :exec
 UPDATE feeds SET last_fetched_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1;
+
+-- name: GetFeedCount :one
+SELECT COUNT(*) FROM feeds;
