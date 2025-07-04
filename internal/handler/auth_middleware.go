@@ -4,16 +4,16 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/olehhuss/rssagg/internal/usecase"
+	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
 // AuthMiddleware validates API key from request headers
 type AuthMiddleware struct {
-	userService usecase.UserServiceInterface
+	userService interfaces.UserServiceInterface
 }
 
 // NewAuthMiddleware creates new auth middleware
-func NewAuthMiddleware(userService usecase.UserServiceInterface) AuthMiddlewareInterface {
+func NewAuthMiddleware(userService interfaces.UserServiceInterface) AuthMiddlewareInterface {
 	return &AuthMiddleware{userService: userService}
 }
 

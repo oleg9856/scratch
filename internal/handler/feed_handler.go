@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/olehhuss/rssagg/internal/usecase"
+	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
 // FeedHandler handles HTTP requests for feeds
 type FeedHandler struct {
-	feedService usecase.FeedServiceInterface
+	feedService interfaces.FeedServiceInterface
 }
 
 // NewFeedHandler creates a new feed handler
-func NewFeedHandler(feedService usecase.FeedServiceInterface) FeedHandlerInterface {
+func NewFeedHandler(feedService interfaces.FeedServiceInterface) FeedHandlerInterface {
 	return &FeedHandler{
 		feedService: feedService,
 	}
@@ -27,7 +27,7 @@ func (h *FeedHandler) CreateFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req usecase.CreateFeedRequest
+	var req interfaces.CreateFeedRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid JSON")
 		return

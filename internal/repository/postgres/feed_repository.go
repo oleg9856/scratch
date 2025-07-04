@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/olehhuss/rssagg/internal/database"
 	"github.com/olehhuss/rssagg/internal/domain"
-	"github.com/olehhuss/rssagg/internal/usecase"
+	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
 // FeedRepository implements usecase.FeedRepository interface
@@ -17,7 +17,7 @@ type FeedRepository struct {
 	queries *database.Queries
 }
 
-func NewFeedRepository(queries *database.Queries) usecase.FeedRepository {
+func NewFeedRepository(queries *database.Queries) interfaces.FeedRepository {
 	return &FeedRepository{
 		queries: queries,
 	}

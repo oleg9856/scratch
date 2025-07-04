@@ -6,26 +6,23 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/olehhuss/rssagg/internal/domain"
+	"github.com/olehhuss/rssagg/internal/interfaces"
 )
+
+//go:generate mockgen -source=feed_service.go -destination=../../test/usecase/feed_service_test.go -package=usecase interfaces.FeedServiceInterface,interfaces.FeedRepository,interfaces.UserRepository
 
 // FeedService handles feed-related business logic
 type FeedService struct {
-	feedRepo FeedRepository // ← Інтерфейс
-	userRepo UserRepository // ← Інтерфейс
+	feedRepo interfaces.FeedRepository // ← Інтерфейс
+	userRepo interfaces.UserRepository // ← Інтерфейс
 }
 
 // NewFeedService creates a new feed service
-func NewFeedService(feedRepo FeedRepository, userRepo UserRepository) FeedServiceInterface {
+func NewFeedService(feedRepo interfaces.FeedRepository, userRepo interfaces.UserRepository) interfaces.FeedServiceInterface {
 	return &FeedService{
 		feedRepo: feedRepo,
 		userRepo: userRepo,
 	}
-}
-
-// CreateFeedRequest represents the request to create a feed
-type CreateFeedRequest struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
 }
 
 func (s *FeedService) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.Feed, error) {
@@ -38,7 +35,7 @@ func (s *FeedService) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*dom
 }
 
 // CreateFeed creates a new feed
-func (s *FeedService) CreateFeed(ctx context.Context, req CreateFeedRequest, userID uuid.UUID) (*domain.Feed, error) {
+func (s *FeedService) CreateFeed(ctx context.Context, req interfaces.CreateFeedRequest, userID uuid.UUID) (*domain.Feed, error) {
 	// Валідація
 	if req.Name == "" {
 		return nil, fmt.Errorf("feed name is required")

@@ -9,27 +9,25 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/olehhuss/rssagg/internal/domain"
+	"github.com/olehhuss/rssagg/internal/interfaces"
 )
+
+//go:generate mockgen -source=user_service.go -destination=../../test/usecase/user_service_test.go -package=usecase interfaces.UserRepository
 
 // UserService handles user-related business logic
 type UserService struct {
-	userRepo UserRepository // ← Тепер інтерфейс!
+	userRepo interfaces.UserRepository // ← Тепер інтерфейс!
 }
 
 // NewUserService creates a new user service
-func NewUserService(userRepo UserRepository) UserServiceInterface {
+func NewUserService(userRepo interfaces.UserRepository) interfaces.UserServiceInterface {
 	return &UserService{
 		userRepo: userRepo,
 	}
 }
 
-// CreateUserRequest represents the request to create a user
-type CreateUserRequest struct {
-	Name string `json:"name"`
-}
-
 // CreateUser creates a new user with generated API key
-func (s *UserService) CreateUser(ctx context.Context, req CreateUserRequest) (*domain.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, req interfaces.CreateUserRequest) (*domain.User, error) {
 	if req.Name == "" {
 		return nil, fmt.Errorf("name is required")
 	}

@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/olehhuss/rssagg/internal/usecase"
+	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
 // UserHandler handles HTTP requests for users
 type UserHandler struct {
-	userService usecase.UserServiceInterface
+	userService interfaces.UserServiceInterface
 }
 
 // NewUserHandler creates a new user handler
-func NewUserHandler(userService usecase.UserServiceInterface) UserHandlerInterface {
+func NewUserHandler(userService interfaces.UserServiceInterface) UserHandlerInterface {
 	return &UserHandler{
 		userService: userService,
 	}
@@ -21,7 +21,7 @@ func NewUserHandler(userService usecase.UserServiceInterface) UserHandlerInterfa
 
 // CreateUser handles POST /users
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var req usecase.CreateUserRequest
+	var req interfaces.CreateUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid JSON")

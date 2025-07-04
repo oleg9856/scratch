@@ -4,24 +4,23 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/olehhuss/rssagg/internal/usecase"
+	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
 // HomeHandler handles requests for the home/landing page
 type HomeHandler struct {
-	userService usecase.UserServiceInterface
-	feedService usecase.FeedServiceInterface
+	userService interfaces.UserServiceInterface
+	feedService interfaces.FeedServiceInterface
 }
 
 // NewHomeHandler creates a new home handler
-func NewHomeHandler(userService usecase.UserServiceInterface, feedService usecase.FeedServiceInterface) *HomeHandler {
+func NewHomeHandler(userService interfaces.UserServiceInterface, feedService interfaces.FeedServiceInterface) *HomeHandler {
 	return &HomeHandler{
 		userService: userService,
 		feedService: feedService,
 	}
 }
 
-// HomeResponse represents the home page data
 type HomeResponse struct {
 	AppName     string    `json:"app_name"`
 	Version     string    `json:"version"`
@@ -34,7 +33,6 @@ type HomeResponse struct {
 type AppStats struct {
 	TotalFeeds int `json:"total_feeds"`
 	TotalUsers int `json:"total_users"`
-	// Додайте більше статистики за потреби
 }
 
 type Feature struct {
@@ -50,13 +48,11 @@ func (h *HomeHandler) GetHome(w http.ResponseWriter, r *http.Request) {
 	// Get real statistics
 	totalUsers, err := h.userService.GetUserCount(ctx)
 	if err != nil {
-		// Log error but continue with 0 count
 		totalUsers = 0
 	}
 
 	totalFeeds, err := h.feedService.GetFeedCount(ctx)
 	if err != nil {
-		// Log error but continue with 0 count
 		totalFeeds = 0
 	}
 

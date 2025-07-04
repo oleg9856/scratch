@@ -8,16 +8,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/olehhuss/rssagg/internal/database"
 	"github.com/olehhuss/rssagg/internal/domain"
-	"github.com/olehhuss/rssagg/internal/usecase"
+	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
-// UserRepository implements usecase.UserRepository interface
+// UserRepository implements interfaces.UserRepository interface
 type UserRepository struct {
 	queries *database.Queries
 }
 
 // NewUserRepository creates a new user repository
-func NewUserRepository(queries *database.Queries) usecase.UserRepository {
+func NewUserRepository(queries *database.Queries) interfaces.UserRepository {
 	return &UserRepository{
 		queries: queries,
 	}
