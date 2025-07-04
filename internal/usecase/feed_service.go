@@ -9,7 +9,7 @@ import (
 	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
-//go:generate mockgen -source=feed_service.go -destination=../../test/usecase/feed_service_test.go -package=usecase interfaces.FeedServiceInterface,interfaces.FeedRepository,interfaces.UserRepository
+//go:generate mockgen -destination=../../test/mocks/feed_service_mock.go -package=mocks github.com/olehhuss/rssagg/internal/interfaces FeedServiceInterface,FeedRepository,UserRepository
 
 // FeedService handles feed-related business logic
 type FeedService struct {
