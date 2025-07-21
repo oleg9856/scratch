@@ -36,7 +36,7 @@ func main() {
 
 	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		log.Fatal("Cannot connect to database")
+		log.Fatal("Can't connect to database")
 	}
 
 	apiCfg := apiConfig{
