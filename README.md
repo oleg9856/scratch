@@ -138,40 +138,6 @@ Authorization: ApiKey YOUR_API_KEY
 GET /v1/healthz
 ```
 
-## 🗄️ Database
-
-### Schema
-
-#### Users
-- `id` (UUID, PK)
-- `name` (VARCHAR)
-- `api_key` (VARCHAR, UNIQUE)
-- `created_at`, `updated_at` (TIMESTAMP)
-
-#### Feeds
-- `id` (UUID, PK)
-- `name` (VARCHAR)
-- `url` (TEXT, UNIQUE)
-- `user_id` (UUID, FK)
-- `last_fetched_at` (TIMESTAMP, nullable)
-- `created_at`, `updated_at` (TIMESTAMP)
-
-#### Posts
-- `id` (UUID, PK)
-- `title` (TEXT)
-- `description` (TEXT, nullable)
-- `url` (TEXT, UNIQUE)
-- `feed_id` (UUID, FK)
-- `published_at` (TIMESTAMP, nullable)
-- `created_at` (TIMESTAMP)
-
-#### Feed Follows
-- `id` (UUID, PK)
-- `user_id` (UUID, FK)
-- `feed_id` (UUID, FK)
-- `created_at`, `updated_at` (TIMESTAMP)
-- UNIQUE(user_id, feed_id)
-
 ## 🛠️ Development
 
 ### Generate SQLC Code

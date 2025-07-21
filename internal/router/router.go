@@ -22,8 +22,6 @@ type Config struct {
 // Setup creates and configures the main router
 func Setup(config *Config) chi.Router {
 	router := chi.NewRouter()
-
-	// CORS middleware
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -36,10 +34,8 @@ func Setup(config *Config) chi.Router {
 	// API v1 routes
 	v1Router := chi.NewRouter()
 
-	// Setup public routes
 	setupPublicRoutes(v1Router, config)
 
-	// Setup protected routes
 	setupProtectedRoutes(v1Router, config)
 
 	// Setup home page routes (public, but at root level)
@@ -57,7 +53,7 @@ func setupPublicRoutes(router chi.Router, config *Config) {
 
 	// User registration (public)
 	if config.UserHandler != nil {
-		router.Post("/users", config.UserHandler.CreateUser)
+		router.Post("/user", config.UserHandler.CreateUser)
 	}
 }
 
@@ -81,7 +77,6 @@ func setupProtectedRoutes(router chi.Router, config *Config) {
 	})
 }
 
-// setupHomeRoutes configures the home/landing page routes (public)
 func setupHomeRoutes(router chi.Router, config *Config) {
 	if config.HomeHandler != nil {
 		// Landing page and info endpoints

@@ -19,7 +19,7 @@ func NewUserHandler(userService interfaces.UserServiceInterface) UserHandlerInte
 	}
 }
 
-// CreateUser handles POST /users
+// CreateUser handles POST /user
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req interfaces.CreateUserRequest
 

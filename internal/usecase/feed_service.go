@@ -9,12 +9,10 @@ import (
 	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
-//go:generate mockgen -destination=../../test/mocks/feed_service_mock.go -package=mocks github.com/olehhuss/rssagg/internal/interfaces FeedServiceInterface,FeedRepository,UserRepository
-
 // FeedService handles feed-related business logic
 type FeedService struct {
-	feedRepo interfaces.FeedRepository // ← Інтерфейс
-	userRepo interfaces.UserRepository // ← Інтерфейс
+	feedRepo interfaces.FeedRepository
+	userRepo interfaces.UserRepository
 }
 
 // NewFeedService creates a new feed service

@@ -7,7 +7,6 @@ import (
 	"github.com/olehhuss/rssagg/internal/interfaces"
 )
 
-// HomeHandler handles requests for the home/landing page
 type HomeHandler struct {
 	userService interfaces.UserServiceInterface
 	feedService interfaces.FeedServiceInterface

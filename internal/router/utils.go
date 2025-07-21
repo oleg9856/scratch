@@ -43,9 +43,3 @@ type HealthResponse struct {
 	Version   string `json:"version,omitempty"`
 	Timestamp string `json:"timestamp"`
 }
-
-// Future middleware can be added here:
-// - Rate limiting middleware
-// - Request ID middleware
-// - Logging middleware
-// - Metrics middleware

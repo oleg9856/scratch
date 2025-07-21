@@ -2,17 +2,15 @@ package usecase
 
 import (
 	"context"
+	"crypto/rand" // Changed from math/rand to crypto/rand for better security
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
-	"math/rand"
+	"fmt" // Added fmt package explicitly
 
 	"github.com/google/uuid"
 	"github.com/olehhuss/rssagg/internal/domain"
 	"github.com/olehhuss/rssagg/internal/interfaces"
 )
-
-//go:generate mockgen -source=user_service.go -destination=../../test/usecase/user_service_test.go -package=usecase interfaces.UserRepository
 
 // UserService handles user-related business logic
 type UserService struct {

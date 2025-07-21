@@ -11,7 +11,7 @@ func SetupUserRoutes(router chi.Router, userHandler handler.UserHandlerInterface
 		return
 	}
 
-	router.Route("/users", func(r chi.Router) {
+	router.Route("/user", func(r chi.Router) {
 		r.Get("/me", userHandler.GetUser) // Get current user info
 		// Future user routes:
 		// r.Put("/me", userHandler.UpdateUser)
