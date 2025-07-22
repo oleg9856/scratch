@@ -1,8 +1,8 @@
 -- +goose Up
 CREATE TABLE users (
     id UUID PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP not null,
+    updated_at TIMESTAMP NOT NULL,
     name VARCHAR(255) NOT NULL
 );
 
