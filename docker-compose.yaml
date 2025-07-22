@@ -1,13 +1,12 @@
-version: '3.8'
+
 services:
-  db:
+  postgres:
     image: postgres:15
     container_name: postgres_container
     environment:
-      POSTGRES_USER: rssagg_user
-      POSTGRES_PASSWORD: password123
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
       POSTGRES_DB: rssagg
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "5432:5432"
     volumes:
@@ -27,14 +26,27 @@ services:
 
 
 
-#  app:
-#    build: .
-#    env_file:
-#      - .env
-#    depends_on:
-#      - db
-#    ports:
-#      - "8082:8082"
+  app:
+    build: .
+    container_name: app
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - migrate
+    ports:
+      - "8082:8082"
+
+  migrate:
+    container_name: migrate
+    build:
+      context: .
+      target: builder
+    working_dir: /app
+    command: ./run_goose.sh
+    depends_on:
+      - postgres
+
 
 volumes:
   db_data:

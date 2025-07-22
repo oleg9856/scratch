@@ -3,5 +3,5 @@ rssagg
 .env
 thunder-tests/
 .idea/
-rssagg
-.vendor/
+vendor/
+vendor/modules.txt
